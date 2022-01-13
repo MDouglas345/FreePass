@@ -96,7 +96,7 @@ void initalizeSeed(){
 }
 
 char* GeneratePassword(size_t length, char* filter){
-    char GENPASSWORD[length];
+    char* GENPASSWORD = (char*)malloc(length);
 
     //min + rand() % (( max + 1 ) - min);
     int filterlen = strlen(filter);
@@ -109,14 +109,16 @@ char* GeneratePassword(size_t length, char* filter){
     }
     std::cout << GENPASSWORD << "\n";
     std::cout << '\n';
+
+    return GENPASSWORD;
 }
 
 
 void RSA_TEST(char* source){
     size_t len = strlen(source);
 
-    char LeftHalf[len/2-1];
-    char RightHalf[len/2];
+    char* LeftHalf = (char*)malloc(len/2-1);
+    char* RightHalf = (char*)malloc(len/2);
 
     for (int i = 0; i <= len/2 ; i++){
         LeftHalf[i] = source[i];
