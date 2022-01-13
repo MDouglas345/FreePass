@@ -19,8 +19,20 @@
 
     PROGRAM FLOW :
 
-    Initalize Seed for RAND
+    1. Initalize Seed for RAND
 
+    2. Create a filter for which character sets to use when generating password
+
+    3. Generate password given a desired length
+
+    4. Create a data structure that stores the password and some identifer for which this password is used for.
+
+    5. Store them in an external file, which can be queried
+
+
+    Appendum 3 :
+    Slight oversight on prime number generation. To make life just a little bit easier at the cost of security(? maybe it affects it ?), we will take the master password
+    break it into two unique chunks and cast them as integers so that they are the input for RSA key generation.
 
 
     References : 
@@ -34,13 +46,36 @@
 #include <random>
 #include <ctime>
 #include <string.h>
+#include <fstream>
 
 using namespace std;
+
+bool SETUP = false;
+
 
 
 char* PASSWORDDUMP;
 
-char* ALPHNUMONLY = {"abcdefghijklmnopqrstuvwxyz"};
+char* MASTERPASSWORD;
+
+char ALPHAONLY[] = {"ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz"};
+char NUMONLY[] = {"1234567890"};
+char SPECIALONLY[] = {"!#$*./,"};
+
+
+struct STOREDPASSWORD{
+    size_t length;
+    char Name[100];
+
+};
+
+
+bool FindChar(char elm, char* source, size_t len){
+    for (size_t i = 0; i < len; i++){
+        if (elm == *(source + i)){return true;}
+    }
+    return false;
+}
 
 void initalizeSeed(){
     time_t now = time(0);
@@ -57,33 +92,57 @@ void initalizeSeed(){
         current++;
     }
 
-
-
     srand(SEED);
 }
 
-char* GeneratePassword(size_t length){
+char* GeneratePassword(size_t length, char* filter){
+    char GENPASSWORD[length];
 
     //min + rand() % (( max + 1 ) - min);
+    int filterlen = strlen(filter);
     for (int i = 0; i < length; i++){
-        cout << (char)(32 + rand() % ((127 +1) - 32)) << " " ;
+        char c = (char)(32 + rand() % ((127 +1) - 32));
+        while(!FindChar(c, filter, filterlen)){
+            c = (char)(32 + rand() % ((127 +1) - 32));
+        }
+        GENPASSWORD[i] = c;
     }
+    std::cout << GENPASSWORD << "\n";
     std::cout << '\n';
-
 }
 
 
-int main(int argc, char* argv[]){
-    std::cout << "Hello World\n";
-    initalizeSeed();
-    cout << "ALL CHAR VALUES FROM 33 - 127\n";
+void RSA_TEST(char* source){
+    size_t len = strlen(source);
 
-    for (int i = 32; i < 127; i++){
-        cout << i << " " <<(char)i << '\n';
-         
+    char LeftHalf[len/2-1];
+    char RightHalf[len/2];
+
+    for (int i = 0; i <= len/2 ; i++){
+        LeftHalf[i] = source[i];
+        RightHalf[i] = source[i + (len/2) ];
+
+        cout << LeftHalf << " " << RightHalf << "\n"; 
     }
+    
+}
+
+int main(int argc, char* argv[]){
+    RSA_TEST("MaryHadALittleLamb");
+    initalizeSeed();
+
+
+
+    char filter[100];
+    strcat(filter, ALPHAONLY);
+
+    strcat(filter, NUMONLY);
+  
+    strcat(filter, SPECIALONLY);
+  
+
 
     for (int i = 0; i < 25; i++){
-        GeneratePassword(100);
+        GeneratePassword(15, filter);
     }
 }

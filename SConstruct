@@ -10,7 +10,7 @@ env['CC'] = 'g++'
 env.SCONS_CXX_STANDARD = 'c++17'
 #env['CC'] = 'g++'
 
-env.Append(CPPFLAGS = ['-std=c++17'])
+env.Append(CPPFLAGS = ['-std=c++17', '-Os'])
 
 t = env.Program(target = 'FreePass', source =['FreePass.cpp'])
 
