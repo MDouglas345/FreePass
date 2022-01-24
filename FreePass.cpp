@@ -34,19 +34,21 @@
     Slight oversight on prime number generation. To make life just a little bit easier at the cost of security(? maybe it affects it ?), we will take the master password
     break it into two unique chunks and cast them as integers so that they are the input for RSA key generation.
 
+    Appendum 4 :
+    Taking a break from the encryption aspect. Focused on a working product.
+    Working on a LexoTree. which is inspiration from one pf Tsoding videos. A tree that keeps track fo all possible characters and makes out words. Used for autocompletion / suggestion
+
 
     References : 
     RSA implementation https://en.wikipedia.org/wiki/RSA_(cryptosystem)
     C++ RAND https://en.cppreference.com/w/cpp/numeric/random/rand
+    GCD https://en.wikipedia.org/wiki/Euclidean_algorithm#Implementations
+
 
 
 */
 
-#include <iostream>
-#include <random>
-#include <ctime>
-#include <string.h>
-#include <fstream>
+#include "LexoTree.h"
 
 using namespace std;
 
@@ -68,6 +70,24 @@ struct STOREDPASSWORD{
     char Name[100];
 
 };
+
+void DumpDebug(char* memory, size_t len){
+    char* current = memory;
+    for (int i = 0; i < len; i++){
+        cout << (size_t)(*current) << " ";
+        current++;
+    }
+    cout << "\n";
+}
+
+int GCD(int a, int b){
+    if (b == 0){
+        return a;
+    }
+    else{
+        return GCD(b, a % b);
+    }
+}
 
 
 bool FindChar(char elm, char* source, size_t len){
@@ -100,40 +120,170 @@ char* GeneratePassword(size_t length, char* filter){
 
     //min + rand() % (( max + 1 ) - min);
     int filterlen = strlen(filter);
-    for (int i = 0; i < length; i++){
+    for (int i = 0; i < length-1; i++){
         char c = (char)(32 + rand() % ((127 +1) - 32));
         while(!FindChar(c, filter, filterlen)){
             c = (char)(32 + rand() % ((127 +1) - 32));
         }
         GENPASSWORD[i] = c;
     }
+
+    GENPASSWORD[length] = '\0';
+
     std::cout << GENPASSWORD << "\n";
     std::cout << '\n';
 
     return GENPASSWORD;
 }
 
+size_t GetNumFromString(char* source){
+    char* current = source;
+    size_t res = 0;
+    while (*current != '\0'){
+        res += (size_t)(*current);
+        current++;
+    }
+
+    return res;
+}
+
+char* Encrypt(size_t PublicKey, size_t N, char* Message){
+    char* current = Message;
+    char* EncryptedMessage = (char*)malloc(strlen(Message));
+    size_t i = 0;
+    while (*current != '\0'){
+        cout << (size_t)(*current) << " ";
+        EncryptedMessage[i] =  (char)std::pow((size_t)(*current), PublicKey) % N;
+        current++;
+        i++;
+    }
+    cout << "\n";
+
+    return EncryptedMessage;
+}
+
+char* Encrypt2(size_t PublicKey, size_t N, char* Message){
+    int* current = reinterpret_cast<int*>(Message);
+    char* EncryptedMessage = (char*)malloc(strlen(Message));
+    int* EnMess = reinterpret_cast<int*>(EncryptedMessage);
+
+    while (current){
+        (*EnMess) = (int)std::pow((*current), PublicKey) % N;
+        EnMess++;
+        current++;
+    }
+
+    return EncryptedMessage;
+
+}
+
+char* Decrypt(size_t PrivateKey, size_t N, char* Message){
+    char* current = Message;
+    char* DecryptedMessage = (char*)malloc(strlen(Message));
+    size_t i = 0;
+
+    while (*current != '\0'){
+        DecryptedMessage[i] =  (char)std::pow((size_t)(*current), PrivateKey) % N;
+        current++;
+        i++;
+    }
+
+    return DecryptedMessage;
+}
 
 void RSA_TEST(char* source){
+
+    //BREAK THE STRING IN 2!
     size_t len = strlen(source);
+    size_t halflen = std::ceil((double)len/2);
+    cout << "Password length : " << len << " \n";
+    cout << "Half length : " << halflen << " \n";
 
-    char* LeftHalf = (char*)malloc(len/2-1);
-    char* RightHalf = (char*)malloc(len/2);
+    char* LeftHalf = (char*)malloc(halflen);
+    char* RightHalf = (char*)malloc(halflen);
 
-    for (int i = 0; i <= len/2 ; i++){
+    for (int i = 0; i <= halflen ; i++){
         LeftHalf[i] = source[i];
-        RightHalf[i] = source[i + (len/2) ];
+        RightHalf[i] = source[i + (len/2)];
 
-        cout << LeftHalf << " " << RightHalf << "\n"; 
     }
+
+    //Not sure if this part is necerssary? Better safe than sorry.
+    LeftHalf[len/2] = '\0';
+    RightHalf[len] = '\0';
+
+
+    //INTERPRET THEM AS INTEGERS! P AND Q
+    size_t P = GetNumFromString(LeftHalf);
+    size_t Q = GetNumFromString(RightHalf);
+    std::cout << " P AND Q : " << P << " " << Q << "\n";
+
+    //CALCULATE N = PQ
+    size_t N = P * Q;
+    std::cout << "N : " << N << " \n";
+
+    //CALCULATE Np = (P-1)(Q-1)
+    size_t Np = (P-1) * (Q-1);
+    std::cout << "Np : " << Np << "\n";
+
+    //Find some value e that is relatively prime ( USE GCD == 1) and that is the public key.
+    size_t PublicKey = rand();
+    while(GCD(PublicKey, Np) != 1){
+        PublicKey = rand();
+    }
+    cout << "The public key is " << PublicKey << " \n";
+
+    //Find d = e^-1 MOD Nq. This is the private key.
+    //FIX THIS! THIS IS CAUSING ISSUES!///////////////////////////////////
+    size_t PrivateKey = (Np * rand()) + 1;
+    
+    cout << "The private key is " << PrivateKey << "\n";
+
+    //TEST THE ENCRYPTION!
+    char* MESSAGE = "HelloWorld!";
+    char* EN = Encrypt(PublicKey, N, MESSAGE);
+    char* DE = Decrypt(PrivateKey, N, EN);
+
+    std::cout << "Message to encrypt : " << MESSAGE << " \n";
+    std::cout << "Encrypted : " ;
+    DumpDebug(EN, 10);
+    cout << "\n";
+    std::cout << "Decrypted : ";
+    DumpDebug(DE, 10);
+    cout << "\n";
+
+
+    //cout << LeftHalf << " " << RightHalf << "\n";
     
 }
 
+void RetrieveFromFile(){
+
+}
+
+
+void LEXOTREE_TEST(){
+    LexoTree Tree;
+
+    char Word[]  = {"HelloWorld"};
+    char Word2[] = {"Hello"};
+    char Pass[] = {"ThisIsASecret"};
+    char Pass2[] = {"ThisIsAnotherSecret"};
+
+    Tree.SetWord(Word,Pass);
+    Tree.SetWord(Word2, Pass2);
+
+    std::cout << Tree.GetPass(Word) << "\n";
+    std::cout << Tree.GetPass(Word2) << "\n";
+}
+
 int main(int argc, char* argv[]){
-    RSA_TEST("MaryHadALittleLamb");
+   
     initalizeSeed();
 
+    LEXOTREE_TEST();
 
+   // RSA_TEST("MichaelLeonardoDouglas");
 
     char filter[100];
     strcat(filter, ALPHAONLY);
