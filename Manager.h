@@ -21,10 +21,14 @@ private:
 
     void StoreReadPass( char* ID,  char* Pass);
 
+    void WritePassFile();
+
 public:
     FreePass();
 
     void CreatePassword(char* ID, size_t length, char* criteria);
+    
+    void CreatePassword(char* ID, size_t length);
 
     char* GetPassword(char* ID);
 

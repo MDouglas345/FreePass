@@ -67,9 +67,7 @@ char* PASSWORDDUMP;
 
 char* MASTERPASSWORD;
 
-char ALPHAONLY[] = {"ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz"};
-char NUMONLY[] = {"1234567890"};
-char SPECIALONLY[] = {"!#$*./,"};
+
 
 
 struct STOREDPASSWORD{
@@ -310,12 +308,20 @@ int main(int argc, char* argv[]){
     if (strcmp(argv[1], "np") == 0){
         if (argc < 5){Usage(); std::cout << "Not enough arguements\n";return 1;}
         PassManager.ApplyFilter(argv[4]);
+        PassManager.CreatePassword(argv[2], stoi(argv[3]));
         std::cout << "Creating new password...\n";
 
         }
-    else if (strcmp(argv[1], "gp") == 0){std::cout << "Getting password...\n";}
-    else if (strcmp(argv[1], "dp") == 0){std::cout << "Deleting password...\n";}
+    else if (strcmp(argv[1], "gp") == 0){
+        std::cout << "Getting password...\n";
+        char* obtained = PassManager.GetPassword(argv[2]);
+        std::cout << obtained << "\n";
+        }
+    else if (strcmp(argv[1], "dp") == 0){
+        std::cout << "Deleting password...\n";
+        }
     else{Usage(); return 1;}
+
     
     
 

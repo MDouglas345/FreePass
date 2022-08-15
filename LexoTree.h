@@ -42,7 +42,7 @@ public:
 
     void DumpNode(LexoNode* , char );
 
-    void DumpNode2(std::ostream&, LexoNode*, int );
+    void DumpNode2(std::ostream&, LexoNode*,  std::string);
 
     void DumpTree(std::ostream&);
 };

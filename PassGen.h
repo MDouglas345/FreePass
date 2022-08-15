@@ -10,7 +10,13 @@
 class PasswordGenerator{
 private:
     unsigned long SEED;
+    const char* ALPHAONLY = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
+    const char* NUMONLY = "1234567890";
+    const char* SPECIALONLY = "!#$*./,";
+    
     char m_Filter[100];
+    int m_FilterLen = 0;
+
 
     bool FindChar(char elm, char* source, size_t len);
 
@@ -20,6 +26,8 @@ public:
     PasswordGenerator();
 
     char* GeneratePassword(size_t length, char* filter);
+
+    char* GeneratePassword(size_t length);
 
     void ApplyFilter(char* filter);
 

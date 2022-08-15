@@ -8,12 +8,32 @@ FreePass::FreePass(){
     ReadPassFile();
 }
 
-void FreePass::CreatePassword(char* ID, size_t length, char* criteria){
-    char* pass = Generator->GeneratePassword(length, criteria);
+void FreePass::CreatePassword(char* ID, size_t length){
+    char* pass = Generator->GeneratePassword(length);
     
     std::cout << "Created password : " << pass << "\n";
     
     lTree->SetWord(ID, pass);
+
+    /**
+     * need to write new entries to file
+     * 
+     */
+     
+
+     WritePassFile();
+}
+
+void FreePass::CreatePassword(char* ID, size_t length, char* criteria){
+    char* pass = Generator->GeneratePassword(length, criteria);
+    
+    std::cout << "Created password : " << pass << "\n";
+
+   
+
+    lTree->SetWord(ID, pass);
+
+    WritePassFile();
 }
 
 char* FreePass::GetPassword(char* ID){
@@ -22,6 +42,24 @@ char* FreePass::GetPassword(char* ID){
 
 void FreePass::StoreReadPass(char* ID, char* Pass){
     lTree->SetWord(ID, Pass);
+}
+
+void FreePass::WritePassFile(){
+    FileStream.open(FILENAME, std::fstream::out);
+
+    if (FileStream.fail()){
+        std::cout << "Failed to open file to write passwords!";
+        return;
+    }
+
+    /**
+     * @brief 
+     * Some kind of encryption algorithm goes here
+     * For now, just write the damn file.
+     */
+
+    lTree->DumpTree(FileStream);
+    FileStream.close();
 }
 
 void FreePass::ReadPassFile(){
@@ -42,6 +80,7 @@ void FreePass::ReadPassFile(){
         StoreReadPass(&line[0], &pass[0]);
     }
 
+    FileStream.close();
 
 }
 

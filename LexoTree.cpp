@@ -59,23 +59,26 @@ void LexoTree::DumpNode(LexoNode* node, char id){
 
 }
 
-void LexoTree::DumpNode2(std::ostream& stream, LexoNode* node, int lvl){
-    if (lvl > 99){return;}
+void LexoTree::DumpNode2(std::ostream& stream, LexoNode* node,  std::string PassName){
+    //std::cout << PassName << "\n";
     if (node->end){
-        DumpText[lvl] = '\0';
-        stream << DumpText << "\n";
+       
+        stream << PassName << "\n";
         stream << node->Password << "\n";
     }
+
     if (!node->Children){return;}
 
     for (int i = 0; i < 255; i++){
-        DumpText[lvl] = (char)i;
-        DumpNode2(stream, &(node->Children[i]), lvl + 1);
+        std::string newString = PassName;
+        newString.append<int>(1,i);
+        DumpNode2(stream, &(node->Children[i]), newString);
     }
 }
 
 
 
 void LexoTree::DumpTree(std::ostream& stream){
-    DumpNode2(stream, Root, 0);
+    
+    DumpNode2(stream, Root, "");
 }
