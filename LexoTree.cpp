@@ -23,6 +23,7 @@ bool LexoTree::SetWord(char* word, char* pass){
 
     CurrentNode->end = true;
     CurrentNode->Password = pass;
+    return true;
 }
 
 char* LexoTree::GetPass(char* word){
@@ -58,7 +59,23 @@ void LexoTree::DumpNode(LexoNode* node, char id){
 
 }
 
-void LexoTree::DumpTree(){
-    DumpNode(Root, ' ');
-    std::cout << "\n";
+void LexoTree::DumpNode2(std::ostream& stream, LexoNode* node, int lvl){
+    if (lvl > 99){return;}
+    if (node->end){
+        DumpText[lvl] = '\0';
+        stream << DumpText << "\n";
+        stream << node->Password << "\n";
+    }
+    if (!node->Children){return;}
+
+    for (int i = 0; i < 255; i++){
+        DumpText[lvl] = (char)i;
+        DumpNode2(stream, &(node->Children[i]), lvl + 1);
+    }
+}
+
+
+
+void LexoTree::DumpTree(std::ostream& stream){
+    DumpNode2(stream, Root, 0);
 }

@@ -36,7 +36,14 @@
 
     Appendum 4 :
     Taking a break from the encryption aspect. Focused on a working product.
-    Working on a LexoTree. which is inspiration from one pf Tsoding videos. A tree that keeps track fo all possible characters and makes out words. Used for autocompletion / suggestion
+    Working on a LexoTree. which is inspiration from one of Tsoding videos. A tree that keeps track fo all possible characters and makes out words. Used for autocompletion / suggestion
+
+    Appendum 5 :
+    Implemented Lexotree. Now I need a way of traversing the tree and obtaining all stored data in it. Might be a challenge.
+    Limit word to 100 chars.
+
+    Appendum 6 :
+    Looking into creating an interface. The idea of a session so that the user does not have to enter a password each time they want to do something is appealing.
 
 
     References : 
@@ -48,7 +55,7 @@
 
 */
 
-#include "LexoTree.h"
+#include "Manager.h"
 
 using namespace std;
 
@@ -240,7 +247,7 @@ void RSA_TEST(char* source){
     cout << "The private key is " << PrivateKey << "\n";
 
     //TEST THE ENCRYPTION!
-    char* MESSAGE = "HelloWorld!";
+    char MESSAGE[] = {"HelloWorld!"};
     char* EN = Encrypt(PublicKey, N, MESSAGE);
     char* DE = Decrypt(PrivateKey, N, EN);
 
@@ -261,29 +268,62 @@ void RetrieveFromFile(){
 
 }
 
+void Usage(){
+    std::cout << "USAGE :   FreePass <command>  <optionals>\n";
+    std::cout << "                    np        <NameOfPassword>        <length>        <criteria>      //Create a new password\n";
+    std::cout << "                                                                      A               //Alphabet only\n";
+    std::cout << "                                                                      0               //Numerals only\n";
+    std::cout << "                                                                      !               //Specials only\n";
+    std::cout << "                                                                      A|0|!           //Combination\n";
+    std::cout << "                    gp        <NameOfPassword>                                        //Get password\n";
+    std::cout << "                    dp        <NameOfPassword>                                        //Delete Password\n";
+    
+}
+
 
 void LEXOTREE_TEST(){
     LexoTree Tree;
 
     char Word[]  = {"HelloWorld"};
     char Word2[] = {"Hello"};
+    char Word3[] = {"Helium"};
     char Pass[] = {"ThisIsASecret"};
     char Pass2[] = {"ThisIsAnotherSecret"};
+    char Pass3[] = {"WhatAWonderfulWorld"};
 
     Tree.SetWord(Word,Pass);
     Tree.SetWord(Word2, Pass2);
+    Tree.SetWord(Word3, Pass3);
 
-    std::cout << Tree.GetPass(Word) << "\n";
-    std::cout << Tree.GetPass(Word2) << "\n";
+    //std::cout << Tree.GetPass(Word) << "\n";
+    //std::cout << Tree.GetPass(Word2) << "\n";
+
+    Tree.DumpTree(std::cout);
 }
 
-int main(int argc, char* argv[]){
-   
-    initalizeSeed();
+int main(int argc, char* argv[]){ 
 
-    LEXOTREE_TEST();
+    FreePass PassManager;
+
+    if (argc < 2){Usage(); return 1;}
+
+    if (strcmp(argv[1], "np") == 0){
+        if (argc < 5){Usage(); std::cout << "Not enough arguements\n";return 1;}
+        PassManager.ApplyFilter(argv[4]);
+        std::cout << "Creating new password...\n";
+
+        }
+    else if (strcmp(argv[1], "gp") == 0){std::cout << "Getting password...\n";}
+    else if (strcmp(argv[1], "dp") == 0){std::cout << "Deleting password...\n";}
+    else{Usage(); return 1;}
+    
+    
+
+/*
+    // LEXOTREE_TEST();
 
    // RSA_TEST("MichaelLeonardoDouglas");
+
 
     char filter[100];
     strcat(filter, ALPHAONLY);
@@ -291,10 +331,11 @@ int main(int argc, char* argv[]){
     strcat(filter, NUMONLY);
   
     strcat(filter, SPECIALONLY);
-  
+
 
 
     for (int i = 0; i < 25; i++){
         GeneratePassword(15, filter);
     }
+*/
 }

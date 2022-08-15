@@ -1,3 +1,6 @@
+#ifndef LEXOTREE_H
+#define LEXOTREE_H
+
 #include <iostream>
 #include <random>
 #include <ctime>
@@ -25,9 +28,12 @@ private:
     size_t TotalNodes;
     LexoNode* Root;
 
+    char* DumpText;
+
 public:
     LexoTree(){
         Root = new LexoNode();
+        DumpText = new char[100];
     }
 
     bool SetWord(char* word, char* pass);
@@ -36,5 +42,9 @@ public:
 
     void DumpNode(LexoNode* , char );
 
-    void DumpTree();
+    void DumpNode2(std::ostream&, LexoNode*, int );
+
+    void DumpTree(std::ostream&);
 };
+
+#endif
