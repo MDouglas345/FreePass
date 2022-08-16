@@ -41,7 +41,13 @@ char* FreePass::GetPassword(char* ID){
 }
 
 void FreePass::StoreReadPass(char* ID, char* Pass){
-    lTree->SetWord(ID, Pass);
+    char* newID = (char*)malloc(sizeof(char) * strlen(ID));
+    char* newPass = (char*)malloc(sizeof(char) * strlen(Pass));
+
+    strcpy(newID, ID);
+    strcpy(newPass, Pass);
+    lTree->SetWord(newID, newPass);
+    //std::cout << ID << " " << Pass << "\n";
 }
 
 void FreePass::WritePassFile(){
@@ -77,6 +83,7 @@ void FreePass::ReadPassFile(){
     while (std::getline(FileStream, line)){
         std::string pass;
         std::getline(FileStream, pass);
+        //std::cout << "Read " << line << " " << pass << "\n";
         StoreReadPass(&line[0], &pass[0]);
     }
 
